@@ -1,0 +1,7 @@
+Should be a small game, similar to ludum dare, singleplayer ofc.
+
+isometric beat-em-up?
+
+forever running game?(random gen will be difficult to get right...)
+
+sidescroller RPG? - small...

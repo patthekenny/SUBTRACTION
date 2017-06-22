@@ -1,0 +1,6 @@
+TODO:
+
+	- Add sprites - done
+	- Collision detection - done
+	- DONT RENDER THINGS NOT IN SCREEN - done
+	- detailed debug mode

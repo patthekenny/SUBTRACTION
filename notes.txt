@@ -1,0 +1,4 @@
+generate entities:
+	look through the image for the specified RG values, set the value of blue to whatever blue it is
+	if there are other pixels throughout the image which have the same blue value except + 1 and the R and G values are 0 of that pixel, add it to the path list for the character
+	switch over the R value, use the enemy ID values to decide which one to spawn

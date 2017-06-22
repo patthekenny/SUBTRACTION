@@ -3,8 +3,10 @@ package com.didey.entities;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
+import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -18,14 +20,15 @@ public abstract class ControllableCharacter {
 	private float moveSpeed, currentSpeed;
 	private Vector2f coords;
 	private final ControllableCharacterID characterID;
-	// Sync animations to current angle of mouse in relation to the player.
 	private Animation animation;
-	// Need less precision for everything else, but as a gamer I feel a need to
-	// make this as accurate as possible...
+	// Sync animations to current angle of mouse in relation to the player.
 	private float rotationTheta;
-	private AnimationState currentAnimationState;
+	private AnimationState currentAnimationState = AnimationState.IDLE;
 	private int animationSpeed;
-	
+
+	private Rectangle leftHitbox, rightHitbox, topHitbox, bottomHitbox;
+	private boolean collidingLeft, collidingRight, collidingTop, collidingBottom;
+
 	private Item[] items;
 
 	public abstract void render(Graphics g);
@@ -34,9 +37,11 @@ public abstract class ControllableCharacter {
 
 	public abstract void handleControls(GameContainer gc, StateBasedGame sbg, int delta);
 
+	public abstract void updateHitbox();
+	
 	public ControllableCharacter(float maxHP, float maxEXP, float health, float exp, Vector2f position,
-			float normalSpeed, String movementAnimationSheetPath, int animationWidth,
-			int animationHeight, int animationSpeed, Item[] items, ControllableCharacterID id) {
+			float normalSpeed, String movementAnimationSheetPath, int animationWidth, int animationHeight,
+			int animationSpeed, Item[] items, ControllableCharacterID id) {
 		this.characterID = id;
 		this.maxHealth = maxHP;
 		this.maxExperience = maxEXP;
@@ -54,10 +59,86 @@ public abstract class ControllableCharacter {
 		} catch (SlickException e1) {
 			e1.printStackTrace();
 		}
-		this.setCurrentAnimationState(AnimationState.IDLE);
+
+		Image idle = this.animation.getImage(0);
+
+		// Throwback.
+		float time = 4.0f;
+
+		this.leftHitbox = new Rectangle(coords.x, coords.y, idle.getWidth() / time, idle.getHeight());
+
+		this.rightHitbox = new Rectangle(coords.x + idle.getWidth() - (idle.getWidth() / time), coords.y,
+				idle.getWidth() / time, idle.getHeight());
+
+		this.topHitbox = new Rectangle(coords.x, coords.y, idle.getWidth(), idle.getHeight() / time);
+
+		this.bottomHitbox = new Rectangle(coords.x, coords.y + idle.getHeight() - (idle.getHeight() / time),
+				idle.getWidth(), idle.getHeight() / time);
 	}
 
+	public boolean isCollidingLeft() {
+		return collidingLeft;
+	}
 
+	public void setCollidingLeft(boolean collidingLeft) {
+		this.collidingLeft = collidingLeft;
+	}
+
+	public boolean isCollidingRight() {
+		return collidingRight;
+	}
+
+	public void setCollidingRight(boolean collidingRight) {
+		this.collidingRight = collidingRight;
+	}
+
+	public boolean isCollidingTop() {
+		return collidingTop;
+	}
+
+	public void setCollidingTop(boolean collidingTop) {
+		this.collidingTop = collidingTop;
+	}
+
+	public boolean isCollidingBottom() {
+		return collidingBottom;
+	}
+
+	public void setCollidingBottom(boolean collidingBottom) {
+		this.collidingBottom = collidingBottom;
+	}
+
+	public Rectangle getLeftHitbox() {
+		return leftHitbox;
+	}
+
+	public void setLeftHitbox(Rectangle leftHitbox) {
+		this.leftHitbox = leftHitbox;
+	}
+
+	public Rectangle getRightHitbox() {
+		return rightHitbox;
+	}
+
+	public void setRightHitbox(Rectangle rightHitbox) {
+		this.rightHitbox = rightHitbox;
+	}
+
+	public Rectangle getTopHitbox() {
+		return topHitbox;
+	}
+
+	public void setTopHitbox(Rectangle topHitbox) {
+		this.topHitbox = topHitbox;
+	}
+
+	public Rectangle getBottomHitbox() {
+		return bottomHitbox;
+	}
+
+	public void setBottomHitbox(Rectangle bottomHitbox) {
+		this.bottomHitbox = bottomHitbox;
+	}
 
 	public float getRotationTheta() {
 		return rotationTheta;

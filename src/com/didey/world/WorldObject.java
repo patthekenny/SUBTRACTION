@@ -1,28 +1,34 @@
 package com.didey.world;
 
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
+import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
+
+import com.didey.main.SharedConstants;
 
 public abstract class WorldObject {
 	
 	private Vector2f position;
-	private float width, height;
-	private Color color;
 	private final WorldObjectID id;
+	private Image sprite;
+	private Shape hitbox;
+	private boolean isSolid;
+	private boolean isRenderable = true;
 	
 	public abstract void render(Graphics g);
 
 	public abstract void update(GameContainer gc, StateBasedGame sbg, int delta);
 	
-	public WorldObject(Vector2f position, float width, float height, Color color, WorldObjectID id, int spriteCol, int spriteRow) {
+	public WorldObject(Vector2f position, WorldObjectID id, int spriteX, int spriteY, boolean isSolid) {
 		this.position = position;
-		this.width = width;
-		this.height = height;
-		this.color = color;
 		this.id = id;
+		this.setSolid(isSolid);
+		this.sprite = SharedConstants.worldSheet.getSprite(spriteX, spriteY);
+		this.hitbox = new Rectangle(position.x, position.y, sprite.getWidth(), sprite.getHeight());
 	}
 
 	public WorldObjectID getID() {
@@ -37,27 +43,35 @@ public abstract class WorldObject {
 		this.position = position;
 	}
 
-	public float getWidth() {
-		return width;
+	public Shape getHitbox() {
+		return hitbox;
 	}
 
-	public void setWidth(float width) {
-		this.width = width;
+	public void setHitbox(Shape hitbox) {
+		this.hitbox = hitbox;
 	}
 
-	public float getHeight() {
-		return height;
+	public Image getSprite() {
+		return sprite;
 	}
 
-	public void setHeight(float height) {
-		this.height = height;
+	public void setSprite(Image sprite) {
+		this.sprite = sprite;
 	}
 
-	public Color getColor() {
-		return color;
+	public boolean isSolid() {
+		return isSolid;
 	}
 
-	public void setColor(Color color) {
-		this.color = color;
+	public void setSolid(boolean isSolid) {
+		this.isSolid = isSolid;
+	}
+
+	public boolean isRenderable() {
+		return isRenderable;
+	}
+
+	public void setRenderable(boolean isRenderable) {
+		this.isRenderable = isRenderable;
 	}
 }

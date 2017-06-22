@@ -36,7 +36,7 @@ public class Main extends StateBasedGame {
 			CanvasGameContainer agc;
 			agc = new CanvasGameContainer(new Main("ADDITION"));
 			agc.setSize(new Dimension(SharedConstants.WIDTH, SharedConstants.HEIGHT));
-			JFrame frame = new JFrame("DIDEY");
+			JFrame frame = new JFrame("HOTLINE - DIDEY");
 			frame.setSize(new Dimension(SharedConstants.WIDTH, SharedConstants.HEIGHT));
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
@@ -51,5 +51,6 @@ public class Main extends StateBasedGame {
 		} catch (SlickException ex) {
 			Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		
 	}
 }

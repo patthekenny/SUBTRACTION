@@ -17,22 +17,35 @@ public abstract class EnemyCharacter {
 	private float rotationTheta;
 	private AnimationState animationState = AnimationState.IDLE;
 	private int animationSpeed;
-	private LinkedList<Vector2f> path;
+	private LinkedList<Float> path;
+	// This will basically be the minimum amount of tiles the enemy can go up/left, or right/down
+	// (will stop early if going to hit a wall).
+	private int minLeftUp, minRightDown;
+	
 	
 	public abstract void render(Graphics g);
 
 	public abstract void update(GameContainer gc, StateBasedGame sbg, int delta);
 
-	public EnemyCharacter(Vector2f position, float normalSpeed, float currentSpeed, EnemyCharacterID id, float rotationTheta, int animationSpeed, LinkedList<Vector2f> path) {
+	public EnemyCharacter(Vector2f position, float normalSpeed, EnemyCharacterID id, int animationSpeed) {
 		this.position = position;
 		this.normalSpeed = normalSpeed;
-		this.currentSpeed = currentSpeed;
+		this.currentSpeed = normalSpeed;
 		this.id = id;
-		this.rotationTheta = rotationTheta;
+		this.rotationTheta = 0.0f;
 		this.animationSpeed = animationSpeed;
-		this.path = path;
+	
 	}
-
+	
+	// Generate what kind of path I want, maybe a set amount of branch from left to right until it hits a solid object?
+	
+	public LinkedList<Float> path() {
+		
+		
+		return null;
+	}
+	
+	
 	public Vector2f getPosition() {
 		return position;
 	}
@@ -87,13 +100,5 @@ public abstract class EnemyCharacter {
 
 	public void setAnimationSpeed(int animationSpeed) {
 		this.animationSpeed = animationSpeed;
-	}
-
-	public LinkedList<Vector2f> getPath() {
-		return path;
-	}
-
-	public void setPath(LinkedList<Vector2f> path) {
-		this.path = path;
 	}
 }

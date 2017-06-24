@@ -1,7 +1,5 @@
 package com.didey.entities;
 
-import java.util.LinkedList;
-
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -10,9 +8,8 @@ import org.newdawn.slick.state.StateBasedGame;
 
 public class TestEnemy extends EnemyCharacter {
 
-	public TestEnemy(Vector2f position, float normalSpeed, float currentSpeed, EnemyCharacterID id, float rotationTheta,
-			int animationSpeed, LinkedList<Vector2f> path) {
-		super(position, normalSpeed, currentSpeed, id, rotationTheta, animationSpeed, path);
+	public TestEnemy(Vector2f position, float normalSpeed, EnemyCharacterID id, int animationSpeed) {
+		super(position, normalSpeed, id, animationSpeed);
 	}
 
 	@Override
@@ -23,6 +20,7 @@ public class TestEnemy extends EnemyCharacter {
 
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int delta) {
+		
 	}
 
 }

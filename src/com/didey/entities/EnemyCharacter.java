@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Random;
 
+import org.lwjgl.Sys;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Vector2f;
@@ -55,36 +56,24 @@ public abstract class EnemyCharacter {
 
 	public LinkedList<Vector2f> generatePath() {
 		LinkedList<Vector2f> tempPath = new LinkedList<Vector2f>();
-
+		
 		switch (movementDirection) {
 		default:
 		case HORIZONTAL: {
-			// Two ifs to not have to debug expressions... just too lazy.
-			for (int i = 0; i < directionalTiles; i++) {
-				boolean isColL = true;
-				boolean isColR = true;
-				
-				if (WorldManager.getObject((int) (position.x - (SharedConstants.TILE_WIDTH * i)),
-						(int) position.y) == null
-						|| EntityManager.getEnemy((int) (position.x - (SharedConstants.TILE_WIDTH * i)),
-								(int) position.y) != null) {
+			for (int i = 1; i <= directionalTiles; i++) {
+			
+				if(WorldManager.getObject((int)position.x + (SharedConstants.TILE_WIDTH * (i + 1)), (int)position.y) != null && EntityManager.getEnemy((int)position.x + (SharedConstants.TILE_WIDTH * (i + 1)), (int)position.y) == null)
+					continue;
 					
-					for(Vector2f v : tempPath) {
-						if((int) (position.x - (SharedConstants.TILE_WIDTH * (i - 1))) == (int)v.x && (int)v.y == (int)position.y || EntityManager.getEnemy((int)(position.x - (SharedConstants.TILE_WIDTH * (i - 1))), (int)position.y) != null) {
-							isColL = false;
-						}
-					}
-					if(!isColL) {
-						tempPath.add(new Vector2f(position.x - (SharedConstants.TILE_WIDTH * i), position.y));						
-					}
+				boolean temp = false;
+				for(Vector2f v : tempPath) {
+					
 				}
-				if (WorldManager.getObject((int) (position.x + (SharedConstants.TILE_WIDTH * i)),
-						(int) position.y) == null
-						|| WorldManager.getObject((int) (position.x + (SharedConstants.TILE_WIDTH * i)),
-								(int) position.y) != null) {
-					tempPath.add(new Vector2f(position.x + (SharedConstants.TILE_WIDTH * i), position.y));
-				}
+				
+				tempPath.add(new Vector2f(position.x + (SharedConstants.TILE_WIDTH * i), position.y));
+				
 			}
+
 			Collections.sort(tempPath, new Comparator<Vector2f>() {
 				public int compare(Vector2f v1, Vector2f v2) {
 					return v1.x < v2.x ? -1 : v1.x == v2.x ? 0 : 1;

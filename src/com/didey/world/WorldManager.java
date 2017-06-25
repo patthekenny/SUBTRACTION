@@ -27,9 +27,9 @@ public class WorldManager {
 			for (int x = 0; x < image.getWidth(); x++) {
 				for (int y = 0; y < image.getHeight(); y++) {
 					Color scanColor = image.getColor(x, y);
-					int r = (int) scanColor.r * 255;
-					int g = (int) scanColor.g * 255;
-					int b = (int) scanColor.b * 255;
+					float r = scanColor.r * 255;
+					float g = scanColor.g * 255;
+					float b = scanColor.b * 255;
 
 					if (r == 255 && g == 0 && b == 0) {
 						Game.player.setX(x * SharedConstants.TILE_WIDTH);
@@ -38,10 +38,6 @@ public class WorldManager {
 						addObjectToWorld(new WallObject(
 								new Vector2f(x * SharedConstants.TILE_WIDTH, y * SharedConstants.TILE_HEIGHT),
 								WorldObjectID.WALL, 0, 0, true));
-					} else if (r == 0 && g == 0 && b == 255) {
-						EntityManager.addEntity(new TestEnemy(
-								new Vector2f(x * SharedConstants.TILE_WIDTH, y * SharedConstants.TILE_HEIGHT), 100,
-								EnemyCharacterID.TEST_GUARD, 100));
 					}
 
 				}
@@ -57,14 +53,14 @@ public class WorldManager {
 		for (int x = 0; x < image.getWidth(); x++) {
 			for (int y = 0; y < image.getHeight(); y++) {
 				Color scanColor = image.getColor(x, y);
-				int r = (int) scanColor.r * 255;
-				int g = (int) scanColor.g * 255;
-				int b = (int) scanColor.b * 255;
-
-				if (r == 10 && g == 0 && b == 0) {
+				float r = scanColor.r * 255;
+				float g = scanColor.g * 255;
+				float b = scanColor.b * 255;
+				
+				if (r == 10 && g == 10 && b == 10) {
 					EntityManager.addEntity(
 							new TestEnemy(new Vector2f(x * SharedConstants.TILE_WIDTH, y * SharedConstants.TILE_HEIGHT),
-									100, EnemyCharacterID.TEST_GUARD, 100));
+									100, EnemyCharacterID.TEST_GUARD, 100, 5));
 				}
 
 			}
@@ -73,8 +69,10 @@ public class WorldManager {
 	}
 
 	/**
-	 * This object is at the world X and Y, not the image X and Y, so take the image X any Y
-	 * and multiply it by TILE_WIDTH/TILE_HEIGHT if looking for image coords.
+	 * This object is at the world X and Y, not the image X and Y, so take the
+	 * image X any Y and divide it by TILE_WIDTH/TILE_HEIGHT if looking for
+	 * image coords.
+	 * 
 	 * @param x
 	 * @param y
 	 * @return

@@ -46,6 +46,7 @@ public class Main extends StateBasedGame {
 			});
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.add(agc);
+			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
 			agc.start();
 		} catch (SlickException ex) {

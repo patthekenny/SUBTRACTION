@@ -6,7 +6,6 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.state.StateBasedGame;
 
-
 public class EntityManager {
 
 	public static ArrayList<EnemyCharacter> entities = new ArrayList<EnemyCharacter>();
@@ -30,6 +29,14 @@ public class EntityManager {
 		}
 	}
 
+	public static EnemyCharacter getEnemy(int x, int y) {
+		for (EnemyCharacter c : entities) {
+			if (c.getPosition().x == x && c.getPosition().y == y) {
+				return c;
+			}
+		}
+		return null;
+	}
 
 	public static void addEntity(EnemyCharacter ec) {
 		entities.add(ec);

@@ -5,9 +5,13 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Random;
 
-import org.lwjgl.Sys;
+import org.newdawn.slick.Animation;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.SpriteSheet;
+import org.newdawn.slick.geom.Line;
+import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -17,27 +21,31 @@ import com.didey.world.WorldManager;
 
 public abstract class EnemyCharacter {
 
+	protected Vector2f position;
+	protected float normalSpeed, currentSpeed;
+	protected EnemyCharacterID id;
+	protected float rotationTheta;
+	protected AnimationState animationState = AnimationState.IDLE;
+	protected int animationSpeed;
+	protected int directionalTiles;
+	protected Vector2f[] path;
+	protected MovementDirection movementDirection;
+	protected int currentTarget = 1;
+	protected int moveTimer = 0;
+	protected String sheetPath;
+	protected Animation animation;
+	protected LinkedList<Shape> vision = new LinkedList<Shape>();
+	
+	protected int animationWidth, animationHeight;
+	
 	private Random rand = new Random();
-
-	private Vector2f position;
-	private float normalSpeed, currentSpeed;
-	private EnemyCharacterID id;
-	private float rotationTheta;
-	private AnimationState animationState = AnimationState.IDLE;
-	private int animationSpeed;
-	private LinkedList<Vector2f> path;
-	// This will basically be the minimum amount of tiles the enemy can go
-	// up/left, or right/down
-	// (will stop early if going to hit a wall).
-	private int directionalTiles;
-	private MovementDirection movementDirection;
 
 	public abstract void render(Graphics g);
 
 	public abstract void update(GameContainer gc, StateBasedGame sbg, int delta);
 
 	public EnemyCharacter(Vector2f position, float normalSpeed, EnemyCharacterID id, int animationSpeed,
-			int moveableTiles) {
+			int moveableTiles, String sheetPath, int animationWidth, int animationHeight, int visionRange) {
 		this.position = position;
 		this.normalSpeed = normalSpeed;
 		this.currentSpeed = normalSpeed;
@@ -45,33 +53,98 @@ public abstract class EnemyCharacter {
 		this.rotationTheta = 0.0f;
 		this.animationSpeed = animationSpeed;
 		this.directionalTiles = moveableTiles;
-		// this.movementDirection = rand.nextInt(102) >= 50 ?
-		// MovementDirection.HORIZONTAL : MovementDirection.VERTICAL;
-		this.movementDirection = MovementDirection.HORIZONTAL;
+		this.animationWidth = animationWidth;
+		this.animationHeight = animationHeight;
+		this.movementDirection = rand.nextInt(102) >= 50 ? MovementDirection.HORIZONTAL : MovementDirection.VERTICAL;
 		this.path = generatePath();
+		try {
+			this.animation = new Animation(new SpriteSheet(sheetPath, animationWidth, animationHeight),
+					this.animationSpeed);
+		} catch (SlickException e) {
+			e.printStackTrace();
+		}
+		updateAnimationRotation();
+
+		// Create vision lines.
+		for(int i = 0; i < 10; i++) {
+			vision.add(new Line(this.position.x + (animationWidth / 2.0f), this.position.y + (animationWidth / 2.0f), this.position.x - 5 + (i * 5), this.position.y + 100));			
+		}
+		
 	}
 
-	// Can refactor this code to be more memory efficient(make the points two
-	// vectors, not however many).
+	protected void updateVision() {
+		for(int i = 0; i < 10; i++) {
+			Line s = (Line)vision.get(i);
+			s.set(this.position.x + (this.animationWidth / 2.0f), this.position.y + (animationWidth / 2.0f), this.position.x - 5 + (i * 5), this.position.y + 100);
+		}
+	}
+	
+	protected void updateAnimationRotation() {
+		float deltaX = path[currentTarget].x - position.x;
+		float deltaY = path[currentTarget].y - position.y;
+		float theta = (float) Math.toDegrees(Math.atan2(deltaX, -deltaY));
 
-	public LinkedList<Vector2f> generatePath() {
+		rotationTheta = theta;
+		animation.getCurrentFrame().setRotation(rotationTheta);
+	}
+
+	protected void updateAnimation(int delta) {
+		updateAnimationRotation();
+		animation.update(delta);
+		if (animationState == AnimationState.IDLE) {
+			animation.setCurrentFrame(0);
+		}
+
+		if (animation.getCurrentFrame() == animation.getImage(0) && animationState == AnimationState.MOVING) {
+			animation.setCurrentFrame(1);
+		}
+	}
+
+	protected Vector2f[] generatePath() {
 		LinkedList<Vector2f> tempPath = new LinkedList<Vector2f>();
-		
+		tempPath.add(new Vector2f(position.x, position.y));
+
 		switch (movementDirection) {
 		default:
 		case HORIZONTAL: {
 			for (int i = 1; i <= directionalTiles; i++) {
-			
-				if(WorldManager.getObject((int)position.x + (SharedConstants.TILE_WIDTH * (i + 1)), (int)position.y) != null && EntityManager.getEnemy((int)position.x + (SharedConstants.TILE_WIDTH * (i + 1)), (int)position.y) == null)
+
+				if (WorldManager.getObject((int) position.x + (SharedConstants.TILE_WIDTH * (i)),
+						(int) position.y) != null
+						&& EntityManager.getEnemy((int) position.x + (SharedConstants.TILE_WIDTH * (i)),
+								(int) position.y) == null)
 					continue;
-					
-				boolean temp = false;
-				for(Vector2f v : tempPath) {
-					
+
+				boolean temp = true;
+				for (Vector2f v : tempPath) {
+					if (v.x == (int) position.x + (SharedConstants.TILE_WIDTH * (i - 1))) {
+						temp = false;
+					}
 				}
-				
+
+				if (temp)
+					continue;
+
 				tempPath.add(new Vector2f(position.x + (SharedConstants.TILE_WIDTH * i), position.y));
-				
+			}
+
+			for (int ix = 1; ix <= directionalTiles; ix++) {
+				if (WorldManager.getObject((int) position.x - (SharedConstants.TILE_WIDTH * (ix)),
+						(int) position.y) != null
+						&& EntityManager.getEnemy((int) position.x - (SharedConstants.TILE_WIDTH * (ix)),
+								(int) position.y) == null)
+					continue;
+
+				boolean temp = true;
+				for (Vector2f v : tempPath) {
+					if (v.x == (int) position.x - (SharedConstants.TILE_WIDTH * (ix - 1))) {
+						temp = false;
+					}
+				}
+				if (temp)
+					continue;
+				tempPath.add(new Vector2f(position.x - (SharedConstants.TILE_WIDTH * ix), position.y));
+
 			}
 
 			Collections.sort(tempPath, new Comparator<Vector2f>() {
@@ -82,19 +155,132 @@ public abstract class EnemyCharacter {
 
 			break;
 		}
+		/*
+		 * 
+		 * 
+		 * VERTICAL
+		 * 
+		 * 
+		 */
 		case VERTICAL: {
-			for (int i = 0; i < directionalTiles; i++) {
-				tempPath.add(new Vector2f(position.x, position.y - (SharedConstants.TILE_HEIGHT * i)));
-				tempPath.add(new Vector2f(position.x, position.y + (SharedConstants.TILE_HEIGHT * i)));
+			for (int i = 1; i <= directionalTiles; i++) {
+
+				if (WorldManager.getObject((int) position.x,
+						(int) position.y + (SharedConstants.TILE_WIDTH * (i))) != null
+						&& EntityManager.getEnemy((int) position.x,
+								(int) position.y + (SharedConstants.TILE_WIDTH * (i))) == null)
+					continue;
+
+				boolean temp = true;
+				for (Vector2f v : tempPath) {
+					if (v.y == (int) position.y + (SharedConstants.TILE_WIDTH * (i - 1))) {
+						temp = false;
+					}
+				}
+				if (temp)
+					continue;
+				tempPath.add(new Vector2f(position.x, position.y + (SharedConstants.TILE_WIDTH * i)));
+
 			}
+
+			for (int ix = 1; ix <= directionalTiles; ix++) {
+				if (WorldManager.getObject((int) position.x,
+						(int) position.y - (SharedConstants.TILE_WIDTH * (ix))) != null
+						&& EntityManager.getEnemy((int) position.x,
+								(int) position.y - (SharedConstants.TILE_WIDTH * (ix))) == null)
+					continue;
+
+				boolean temp = true;
+				for (Vector2f v : tempPath) {
+					if (v.y == (int) position.y - (SharedConstants.TILE_WIDTH * (ix - 1))) {
+						temp = false;
+					}
+				}
+				if (temp)
+					continue;
+				tempPath.add(new Vector2f(position.x, position.y - (SharedConstants.TILE_WIDTH * ix)));
+
+			}
+
+			Collections.sort(tempPath, new Comparator<Vector2f>() {
+				public int compare(Vector2f v1, Vector2f v2) {
+					return v1.y < v2.y ? -1 : v1.y == v2.y ? 0 : 1;
+				}
+			});
+
 			break;
 		}
 		}
 
-		System.out.println((this.movementDirection == MovementDirection.HORIZONTAL ? "HORIZONTAL: " : "VERTICAL: ")
-				+ directionalTiles + " " + tempPath.toString());
+		Vector2f[] tempVecs = { tempPath.get(0), tempPath.get(tempPath.size() - 1) };
 
-		return tempPath;
+		position.x = tempVecs[0].x;
+		position.y = tempVecs[0].y;
+
+		return tempVecs;
+	}
+
+	protected void updateMovement(int delta) {
+		float angle = (float) Math.atan2(getPath()[getCurrentTarget()].y - getPosition().y,
+				getPath()[getCurrentTarget()].x - getPosition().x);
+		float xVel = getCurrentSpeed() * (float) Math.cos(angle) * (delta / 1000f);
+		float yVel = getCurrentSpeed() * (float) Math.sin(angle) * (delta / 1000f);
+
+		if ((float) Math.round(getPosition().x) == getPath()[(getCurrentTarget())].x
+				&& (float) Math.round(getPosition().y) == getPath()[getCurrentTarget()].y) {
+			animationState = AnimationState.IDLE;
+			moveTimer += delta;
+			if (moveTimer >= 1000) {
+				setCurrentTarget((getCurrentTarget() == 0 ? 1 : 0));
+				moveTimer = 0;
+			}
+
+		} else {
+			animationState = AnimationState.MOVING;
+			this.setX(getPosition().x + xVel);
+			this.setY(getPosition().y + yVel);
+		}
+
+	}
+
+	public LinkedList<Shape> getVisionRays() {
+		return vision;
+	}
+	
+	public void setVision(LinkedList<Shape> vision) {
+		this.vision = vision;
+	}
+	
+	public int getDirectionalTiles() {
+		return directionalTiles;
+	}
+
+	public void setDirectionalTiles(int directionalTiles) {
+		this.directionalTiles = directionalTiles;
+	}
+
+	public MovementDirection getMovementDirection() {
+		return movementDirection;
+	}
+
+	public void setMovementDirection(MovementDirection movementDirection) {
+		this.movementDirection = movementDirection;
+	}
+
+	public String getSheetPath() {
+		return sheetPath;
+	}
+
+	public void setSheetPath(String sheetPath) {
+		this.sheetPath = sheetPath;
+	}
+
+	public Animation getAnimation() {
+		return animation;
+	}
+
+	public void setAnimation(Animation animation) {
+		this.animation = animation;
 	}
 
 	public void setX(float newX) {
@@ -161,11 +347,19 @@ public abstract class EnemyCharacter {
 		this.animationSpeed = animationSpeed;
 	}
 
-	public LinkedList<Vector2f> getPath() {
+	public Vector2f[] getPath() {
 		return path;
 	}
 
-	public void setPath(LinkedList<Vector2f> path) {
+	public void setPath(Vector2f[] path) {
 		this.path = path;
+	}
+
+	public int getCurrentTarget() {
+		return currentTarget;
+	}
+
+	public void setCurrentTarget(int currentTarget) {
+		this.currentTarget = currentTarget;
 	}
 }

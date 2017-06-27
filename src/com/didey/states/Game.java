@@ -64,6 +64,7 @@ public class Game extends BasicGameState {
 	}
 
 	// I could make a vector of the mouse and player coords and do the angle calculations there, keep this in mind for later.
+	// Probably not, this kinda math is much less expensive.
 	public void updatePlayerDirection(GameContainer gc, StateBasedGame sbg, int delta) {
 		
 		// Great SO post explaining the logic here:

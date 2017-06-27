@@ -38,7 +38,7 @@ public abstract class ControllableCharacter {
 	public abstract void handleControls(GameContainer gc, StateBasedGame sbg, int delta);
 
 	public abstract void updateHitbox();
-	
+
 	public ControllableCharacter(float maxHP, float maxEXP, float health, float exp, Vector2f position,
 			float normalSpeed, String movementAnimationSheetPath, int animationWidth, int animationHeight,
 			int animationSpeed, Item[] items, ControllableCharacterID id) {

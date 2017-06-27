@@ -60,7 +60,7 @@ public class WorldManager {
 				if (r == 10 && g == 10 && b == 10) {
 					EntityManager.addEntity(
 							new TestEnemy(new Vector2f(x * SharedConstants.TILE_WIDTH, y * SharedConstants.TILE_HEIGHT),
-									100, EnemyCharacterID.TEST_GUARD, 100, 5));
+									100, EnemyCharacterID.TEST_GUARD, 400, 5, "resources/sheets/entities/enemies/testguard.png", 32, 32, 200));
 				}
 
 			}

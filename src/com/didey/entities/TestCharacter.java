@@ -24,7 +24,6 @@ public class TestCharacter extends ControllableCharacter {
 	@Override
 	public void render(Graphics g) {
 		getAnimation().draw(getCoords().x, getCoords().y);
-
 	}
 
 	@Override

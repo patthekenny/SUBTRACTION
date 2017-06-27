@@ -29,7 +29,7 @@ public class Game extends BasicGameState {
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		gc.setAlwaysRender(true);
 		cameraHandler = new CameraHandler(new Vector2f(0.0f, 0.0f), gc);
-		
+		gc.setVSync(true);
 		//EntityManager.addEntity(new TestEnemy(new Vector2f(400, 400), 100, 100, EnemyCharacterID.TEST_GUARD, 0.0f, 100, null));
 	}
 
@@ -56,7 +56,6 @@ public class Game extends BasicGameState {
 		cameraHandler.update(gc, sbg, delta);
 		WorldManager.updateObjects(gc, sbg, delta);
 		EntityManager.updateEntities(gc, sbg, delta);
-		player.getAnimation().update(delta);
 		if (gc.getInput().isKeyPressed(Keyboard.KEY_F5)) {
 			SharedValues.isDebug = !SharedValues.isDebug;
 			System.out.println("DEBUG MODE " + (SharedValues.isDebug ? "IS NOW ON" : "IS NOW OFF"));

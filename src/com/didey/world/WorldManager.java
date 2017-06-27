@@ -68,6 +68,15 @@ public class WorldManager {
 
 	}
 
+	public static boolean isCollidingWithAnySolid(Shape shape) {
+		for(WorldObject wo : worldObjects) {
+			if(shape.intersects(wo.getHitbox()) && wo.isSolid()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * This object is at the world X and Y, not the image X and Y, so take the
 	 * image X any Y and divide it by TILE_WIDTH/TILE_HEIGHT if looking for

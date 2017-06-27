@@ -34,15 +34,10 @@ public class TestCharacter extends ControllableCharacter {
 
 		if (getCurrentAnimationState() == AnimationState.IDLE) {
 			getAnimation().setCurrentFrame(0);
+			getAnimation().stop();
+		} else {
+			getAnimation().start();			
 		}
-
-		// This is to make sure that the idle frame isn't present in the
-		// animations when the player is moving.
-		if (getAnimation().getCurrentFrame() == getAnimation().getImage(0)
-				&& getCurrentAnimationState() == AnimationState.MOVING) {
-			getAnimation().setCurrentFrame(1);
-		}
-
 	}
 
 	@Override

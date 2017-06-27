@@ -12,6 +12,7 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Line;
 import org.newdawn.slick.geom.Shape;
+import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -23,6 +24,7 @@ public abstract class EnemyCharacter {
 
 	protected Vector2f position;
 	protected float normalSpeed, currentSpeed;
+	protected int animationWidth, animationHeight;
 	protected EnemyCharacterID id;
 	protected float rotationTheta;
 	protected AnimationState animationState = AnimationState.IDLE;
@@ -35,8 +37,6 @@ public abstract class EnemyCharacter {
 	protected String sheetPath;
 	protected Animation animation;
 	protected LinkedList<Shape> vision = new LinkedList<Shape>();
-	
-	protected int animationWidth, animationHeight;
 	
 	private Random rand = new Random();
 
@@ -64,25 +64,29 @@ public abstract class EnemyCharacter {
 			e.printStackTrace();
 		}
 		updateAnimationRotation();
-
+		
 		// Create vision lines.
 		for(int i = 0; i < 10; i++) {
 			vision.add(new Line(this.position.x + (animationWidth / 2.0f), this.position.y + (animationWidth / 2.0f), this.position.x - 5 + (i * 5), this.position.y + 100));			
 		}
-		
 	}
 
 	protected void updateVision() {
+		float deltaX = path[currentTarget].x - position.x;
+		float deltaY = path[currentTarget].y - position.y;
+		float theta = (float) Math.toDegrees(Math.atan2(deltaX, deltaY));
+		
 		for(int i = 0; i < 10; i++) {
 			Line s = (Line)vision.get(i);
 			s.set(this.position.x + (this.animationWidth / 2.0f), this.position.y + (animationWidth / 2.0f), this.position.x - 5 + (i * 5), this.position.y + 100);
+			vision.set(i, (Line)s.transform(Transform.createRotateTransform(-(float)Math.toRadians(theta), this.position.x + (this.animationWidth / 2.0f), this.position.y + (animationWidth / 2.0f))));
 		}
 	}
 	
 	protected void updateAnimationRotation() {
 		float deltaX = path[currentTarget].x - position.x;
 		float deltaY = path[currentTarget].y - position.y;
-		float theta = (float) Math.toDegrees(Math.atan2(deltaX, -deltaY));
+		float theta = (float) Math.toDegrees(Math.atan2(deltaX, deltaY));
 
 		rotationTheta = theta;
 		animation.getCurrentFrame().setRotation(rotationTheta);
@@ -90,13 +94,12 @@ public abstract class EnemyCharacter {
 
 	protected void updateAnimation(int delta) {
 		updateAnimationRotation();
-		animation.update(delta);
+		
 		if (animationState == AnimationState.IDLE) {
-			animation.setCurrentFrame(0);
-		}
-
-		if (animation.getCurrentFrame() == animation.getImage(0) && animationState == AnimationState.MOVING) {
-			animation.setCurrentFrame(1);
+			getAnimation().setCurrentFrame(0);
+			getAnimation().stop();
+		} else {
+			getAnimation().start();			
 		}
 	}
 

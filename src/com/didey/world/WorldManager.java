@@ -56,11 +56,12 @@ public class WorldManager {
 				float r = scanColor.r * 255;
 				float g = scanColor.g * 255;
 				float b = scanColor.b * 255;
-				
+
 				if (r == 10 && g == 10 && b == 10) {
 					EntityManager.addEntity(
 							new TestEnemy(new Vector2f(x * SharedConstants.TILE_WIDTH, y * SharedConstants.TILE_HEIGHT),
-									100, EnemyCharacterID.TEST_GUARD, 400, 5, "resources/sheets/entities/enemies/testguard.png", 32, 32, 200));
+									100, EnemyCharacterID.TEST_GUARD, 400, 5,
+									"resources/sheets/entities/enemies/testguard.png", 32, 32, 200));
 				}
 
 			}
@@ -68,18 +69,18 @@ public class WorldManager {
 
 	}
 
-	public static boolean isCollidingWithAnySolid(Shape shape) {
+	public static boolean checkPointInSolidObject(float x, float y) {
 		for(WorldObject wo : worldObjects) {
-			if(shape.intersects(wo.getHitbox()) && wo.isSolid()) {
+			if(wo.getHitbox().contains(x, y) && wo.isSolid()) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	/**
 	 * This object is at the world X and Y, not the image X and Y, so take the
-	 * image X any Y and divide it by TILE_WIDTH/TILE_HEIGHT if looking for
+	 * image X any Y and divide it by TILE_WIDTH/TILE_HEIGHT if looking fora
 	 * image coords.
 	 * 
 	 * @param x

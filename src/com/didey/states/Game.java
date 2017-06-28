@@ -1,5 +1,7 @@
 package com.didey.states;
 
+import java.util.LinkedList;
+
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
@@ -14,6 +16,7 @@ import com.didey.entities.ControllableCharacterID;
 import com.didey.entities.EntityManager;
 import com.didey.entities.TestCharacter;
 import com.didey.main.SharedValues;
+import com.didey.physics.Raycast;
 import com.didey.render.UI;
 import com.didey.world.WorldManager;
 
@@ -22,35 +25,59 @@ public class Game extends BasicGameState {
 	public static TestCharacter player = new TestCharacter(100.0f, 100.0f, 100.0f, 100.0f, new Vector2f(100.0f, 100.0f),
 			200, "resources/sheets/entities/testcharacter/movementsheet.png", 32, 32, 400, null,
 			ControllableCharacterID.MAIN_PLAYER);
-	
-	public static CameraHandler cameraHandler;
 
+	public static CameraHandler cameraHandler;
+	float L, W;
+	
+	LinkedList<Raycast> rays = new LinkedList<Raycast>();
+	
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		gc.setAlwaysRender(true);
 		cameraHandler = new CameraHandler(new Vector2f(0.0f, 0.0f), gc);
 		gc.setVSync(true);
-		//EntityManager.addEntity(new TestEnemy(new Vector2f(400, 400), 100, 100, EnemyCharacterID.TEST_GUARD, 0.0f, 100, null));
+		L = player.getCoords().x + (player.getAnimation().getCurrentFrame().getWidth() / 2f);
+		W = player.getCoords().y + (player.getAnimation().getCurrentFrame().getHeight() / 2f);
+
+
+		for(int i = 0; i < 20; i++) {
+			rays.add(new Raycast(L, W, L + 5 + (i * 5), W + 5 + (i * 5), 250f));
+		}
+		
 	}
 
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
 		g.translate(cameraHandler.getCoords().x, cameraHandler.getCoords().y);
+
 		g.setBackground(new Color(130, 151, 186));
 		WorldManager.renderObjects(g);
 		EntityManager.renderEntities(g);
-		player.render(g);
 
+		player.render(g);
+		
+
+		g.setColor(Color.yellow);
+		for(Raycast t : rays) {
+			t.draw(g);
+		}
+		
 		if (SharedValues.isDebug)
 			UI.renderDebug(gc, g);
-		
-		
-		
+
 		g.translate(-cameraHandler.getCoords().x, -cameraHandler.getCoords().y);
 	}
 
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int delta) throws SlickException {
+		L = player.getCoords().x + (player.getAnimation().getCurrentFrame().getWidth() / 2f);
+		W = player.getCoords().y + (player.getAnimation().getCurrentFrame().getHeight() / 2f);
+
+		for(int i = 0; i < rays.size(); i++) {
+			rays.get(i).set(L, W, L + 1, W + 1);
+			rays.get(i).updateRay(gc, sbg, delta);
+		}
+		
 		updatePlayerDirection(gc, sbg, delta);
 		player.update(gc, sbg, delta);
 		cameraHandler.update(gc, sbg, delta);
@@ -62,22 +89,23 @@ public class Game extends BasicGameState {
 		}
 	}
 
-	// I could make a vector of the mouse and player coords and do the angle calculations there, keep this in mind for later.
+	// I could make a vector of the mouse and player coords and do the angle
+	// calculations there, keep this in mind for later.
 	// Probably not, this kinda math is much less expensive.
 	public void updatePlayerDirection(GameContainer gc, StateBasedGame sbg, int delta) {
-		
+
 		// Great SO post explaining the logic here:
 		// https://stackoverflow.com/questions/10099895/java-slick2d-how-to-translate-mouse-coordinates-to-world-coordinates
-		
+
 		float deltaX = (gc.getInput().getMouseX() - cameraHandler.getCoords().x) - player.getCoords().x;
 		float deltaY = (gc.getInput().getMouseY() - cameraHandler.getCoords().y) - player.getCoords().y;
-		
+
 		float theta = (float) Math.toDegrees(Math.atan2(deltaX, -deltaY));
-		
+
 		player.getAnimation().getCurrentFrame().setRotation(theta);
-		
+
 	}
-	
+
 	@Override
 	public int getID() {
 		return 2;

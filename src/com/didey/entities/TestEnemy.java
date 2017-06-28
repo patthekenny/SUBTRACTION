@@ -3,7 +3,6 @@ package com.didey.entities;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -25,9 +24,9 @@ public class TestEnemy extends EnemyCharacter {
 		
 		getAnimation().draw(getPosition().x, getPosition().y);
 		g.setColor(Color.yellow);
-		for(Shape s : getVisionRays()) {
+		/*for(Shape s : getVisionRays()) {
 			g.draw(s);
-		}
+		}*/
 	}
 
 	@Override

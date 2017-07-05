@@ -14,10 +14,7 @@ public class WallObject extends WorldObject {
 	@Override
 	public void render(Graphics g) {
 		getSprite().draw(getPosition().x, getPosition().y);
-		g.draw(getHitbox());
-		g.drawString("X: " + getPosition().x, getPosition().x, getPosition().y - 60);
-		g.drawString("Y: " + getPosition().y, getPosition().x, getPosition().y - 40);
-}
+	}
 
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int delta) {

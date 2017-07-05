@@ -76,6 +76,10 @@ public abstract class ControllableCharacter {
 				idle.getWidth(), idle.getHeight() / time);
 	}
 
+	public boolean isPointInHitboxes(float x, float y) {
+		return this.rightHitbox.contains(x, y) || this.bottomHitbox.contains(x, y) || this.topHitbox.contains(x, y) || this.leftHitbox.contains(x, y);
+	}
+	
 	public boolean isCollidingLeft() {
 		return collidingLeft;
 	}

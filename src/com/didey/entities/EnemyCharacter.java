@@ -10,13 +10,11 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
-import org.newdawn.slick.geom.Line;
-import org.newdawn.slick.geom.Shape;
-import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 
 import com.didey.main.SharedConstants;
+import com.didey.physics.Raycast;
 import com.didey.render.AnimationState;
 import com.didey.world.WorldManager;
 
@@ -36,8 +34,8 @@ public abstract class EnemyCharacter {
 	protected int moveTimer = 0;
 	protected String sheetPath;
 	protected Animation animation;
-	protected LinkedList<Shape> vision = new LinkedList<Shape>();
-	
+	protected LinkedList<Raycast> vision = new LinkedList<Raycast>();
+
 	private Random rand = new Random();
 
 	public abstract void render(Graphics g);
@@ -64,25 +62,38 @@ public abstract class EnemyCharacter {
 			e.printStackTrace();
 		}
 		updateAnimationRotation();
-		
-		// Create vision lines.
-		for(int i = 0; i < 10; i++) {
-			vision.add(new Line(this.position.x + (animationWidth / 2.0f), this.position.y + (animationWidth / 2.0f), this.position.x - 5 + (i * 5), this.position.y + 100));			
-		}
-	}
 
-	protected void updateVision() {
-		float deltaX = path[currentTarget].x - position.x;
-		float deltaY = path[currentTarget].y - position.y;
-		float theta = (float) Math.toDegrees(Math.atan2(deltaX, deltaY));
+		// Create vision lines.
+		float centeredX = position.x + (this.animationWidth / 2f);
+		float centeredY = position.y + (this.animationHeight / 2f);
 		
-		for(int i = 0; i < 10; i++) {
-			Line s = (Line)vision.get(i);
-			s.set(this.position.x + (this.animationWidth / 2.0f), this.position.y + (animationWidth / 2.0f), this.position.x - 5 + (i * 5), this.position.y + 100);
-			vision.set(i, (Line)s.transform(Transform.createRotateTransform(-(float)Math.toRadians(theta), this.position.x + (this.animationWidth / 2.0f), this.position.y + (animationWidth / 2.0f))));
+		for (float i = 0; i < 10; i++) {
+			float angle = (float)Math.toDegrees(rotationTheta + i);
+			float dx = (float)Math.cos(angle);
+			float dy = (float)Math.sin(angle);
+			vision.add(new Raycast(centeredX, centeredY, centeredX + dx, centeredY + dy, 100f));
 		}
+		System.out.println(vision);
 	}
 	
+	protected void updateVision(GameContainer gc, StateBasedGame sbg, int delta) {
+		float centeredX = position.x + (this.animationWidth / 2f);
+		float centeredY = position.y + (this.animationHeight / 2f);
+		
+		
+		for (int i = 0; i < vision.size(); i++) {
+			float angle = (float)Math.toDegrees(rotationTheta + i);
+			float dx = (float)Math.cos(angle);
+			float dy = (float)Math.sin(angle);
+			vision.get(i).set(centeredX, centeredY, centeredX + dx, centeredY + dy);
+		}
+		
+		for(Raycast c : vision) {
+			c.updateRay(gc, sbg, delta);
+		}
+		
+	}
+
 	protected void updateAnimationRotation() {
 		float deltaX = path[currentTarget].x - position.x;
 		float deltaY = path[currentTarget].y - position.y;
@@ -94,12 +105,12 @@ public abstract class EnemyCharacter {
 
 	protected void updateAnimation(int delta) {
 		updateAnimationRotation();
-		
+
 		if (animationState == AnimationState.IDLE) {
 			getAnimation().setCurrentFrame(0);
 			getAnimation().stop();
 		} else {
-			getAnimation().start();			
+			getAnimation().start();
 		}
 	}
 
@@ -246,14 +257,14 @@ public abstract class EnemyCharacter {
 
 	}
 
-	public LinkedList<Shape> getVisionRays() {
+	
+	public LinkedList<Raycast> getVision() {
 		return vision;
 	}
-	
-	public void setVision(LinkedList<Shape> vision) {
+
+	public void setVision(LinkedList<Raycast> vision) {
 		this.vision = vision;
 	}
-	
 	public int getDirectionalTiles() {
 		return directionalTiles;
 	}

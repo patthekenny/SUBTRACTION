@@ -2,9 +2,12 @@ package com.didey.physics;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 
+import com.didey.states.Game;
 import com.didey.world.WorldManager;
+
 
 public class Raycast {
 
@@ -12,26 +15,32 @@ public class Raycast {
 	private float x1, y1, x2, y2;
 	private float angle, deltaX, deltaY;
 	private boolean isColliding;
-
+	// Couldn't think of a better name for this, I've been awake for far too long.
+	private Vector2f firstPoint;
+	
 	public Raycast(float x1, float y1, float x2, float y2, float range) {
 		this.x1 = x1;
 		this.x2 = x2;
 		this.y1 = y1;
 		this.y2 = y2;
-		// Do a squared range comparison, it's cheaper.
+		this.firstPoint = new Vector2f(x2, y2);
+		// Do a squared range comparison, it's cheaper. We're gonna wanna be as 
+		// efficient as possible, there could be hundreds of thousands of these casts.
 		this.range = range * range;
 		angle = (float) Math.atan2(y2 - y1, x2 - x1);
 		deltaX = (float) Math.cos(angle);
 		deltaY = (float) Math.sin(angle);
 	}
 
-	public void updateRay(GameContainer gc, StateBasedGame sbg, int delta) {
+	public void updateRay (GameContainer gc, StateBasedGame sbg, int delta) {
 		while (lengthSquared() <= range) {
 			x2 += deltaX;
 			y2 += deltaY;
-			if(WorldManager.checkPointInSolidObject(x2, y2)) {
+			if(WorldManager.checkPointInSolidObject(x2, y2) || Game.player.isPointInHitboxes(x2, y2)) {
+				isColliding = true;
 				break;
 			}
+			isColliding = false;
 		}
 	}
 
@@ -48,6 +57,8 @@ public class Raycast {
 		this.y1 = y1;
 		this.x2 = x2;
 		this.y2 = y2;
+		this.firstPoint.x = x2;
+		this.firstPoint.y = y2;
 	}
 
 	public float getRange() {
@@ -120,6 +131,14 @@ public class Raycast {
 
 	public void setColliding(boolean isColliding) {
 		this.isColliding = isColliding;
+	}
+
+	public Vector2f getFirstPoint() {
+		return firstPoint;
+	}
+
+	public void setFirstPoint(Vector2f firstPoint) {
+		this.firstPoint = firstPoint;
 	}
 
 

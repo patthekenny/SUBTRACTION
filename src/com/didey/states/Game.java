@@ -1,7 +1,5 @@
 package com.didey.states;
 
-import java.util.LinkedList;
-
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
@@ -16,7 +14,6 @@ import com.didey.entities.ControllableCharacterID;
 import com.didey.entities.EntityManager;
 import com.didey.entities.TestCharacter;
 import com.didey.main.SharedValues;
-import com.didey.physics.Raycast;
 import com.didey.render.UI;
 import com.didey.world.WorldManager;
 
@@ -27,62 +24,35 @@ public class Game extends BasicGameState {
 			ControllableCharacterID.MAIN_PLAYER);
 
 	public static CameraHandler cameraHandler;
-	float L, W;
+
 	
-	LinkedList<Raycast> rays = new LinkedList<Raycast>();
-	
-	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		gc.setAlwaysRender(true);
 		cameraHandler = new CameraHandler(new Vector2f(0.0f, 0.0f), gc);
 		gc.setVSync(true);
-		L = player.getCoords().x + (player.getAnimation().getCurrentFrame().getWidth() / 2f);
-		W = player.getCoords().y + (player.getAnimation().getCurrentFrame().getHeight() / 2f);
-
-
-		for(int i = 0; i < 20; i++) {
-			rays.add(new Raycast(L, W, L + 5 + (i * 5), W + 5 + (i * 5), 250f));
-		}
-		
 	}
 
-	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
 		g.translate(cameraHandler.getCoords().x, cameraHandler.getCoords().y);
 
 		g.setBackground(new Color(130, 151, 186));
 		WorldManager.renderObjects(g);
 		EntityManager.renderEntities(g);
-
 		player.render(g);
-		
 
-		g.setColor(Color.yellow);
-		for(Raycast t : rays) {
-			t.draw(g);
-		}
-		
 		if (SharedValues.isDebug)
 			UI.renderDebug(gc, g);
 
 		g.translate(-cameraHandler.getCoords().x, -cameraHandler.getCoords().y);
 	}
 
-	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int delta) throws SlickException {
-		L = player.getCoords().x + (player.getAnimation().getCurrentFrame().getWidth() / 2f);
-		W = player.getCoords().y + (player.getAnimation().getCurrentFrame().getHeight() / 2f);
-
-		for(int i = 0; i < rays.size(); i++) {
-			rays.get(i).set(L, W, L + 1, W + 1);
-			rays.get(i).updateRay(gc, sbg, delta);
-		}
-		
 		updatePlayerDirection(gc, sbg, delta);
 		player.update(gc, sbg, delta);
 		cameraHandler.update(gc, sbg, delta);
 		WorldManager.updateObjects(gc, sbg, delta);
 		EntityManager.updateEntities(gc, sbg, delta);
+		
 		if (gc.getInput().isKeyPressed(Keyboard.KEY_F5)) {
 			SharedValues.isDebug = !SharedValues.isDebug;
 			System.out.println("DEBUG MODE " + (SharedValues.isDebug ? "IS NOW ON" : "IS NOW OFF"));
